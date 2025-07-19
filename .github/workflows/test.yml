@@ -10,7 +10,7 @@ jobs:
   test:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     
     steps:
@@ -20,11 +20,20 @@ jobs:
       id: set-up-homebrew
       uses: Homebrew/actions/setup-homebrew@master
     
-    - name: Tap local repository
+    - name: Tap local repository (Unix)
+      if: runner.os != 'Windows'
       run: |
         # Create a temporary tap name and tap the local directory
         mkdir -p $(brew --repo)/Library/Taps/test
         ln -sf $PWD $(brew --repo)/Library/Taps/test/homebrew-kgrep
+    
+    - name: Tap local repository (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        # Create a temporary tap name and tap the local directory
+        mkdir -p "$(brew --repo)/Library/Taps/test"
+        New-Item -ItemType Junction -Path "$(brew --repo)/Library/Taps/test/homebrew-kgrep" -Target $PWD
+      shell: pwsh
     
     - name: Test formula syntax
       run: brew audit --strict test/kgrep/kgrep
@@ -34,7 +43,8 @@ jobs:
         # Test that the formula can be installed
         brew install test/kgrep/kgrep
     
-    - name: Test kgrep functionality
+    - name: Test kgrep functionality (Unix)
+      if: runner.os != 'Windows'
       run: |
         # Verify kgrep binary exists and is executable
         which kgrep
@@ -43,4 +53,17 @@ jobs:
         kgrep version
         kgrep --help
         
-        echo "All kgrep functionality tests passed" 
+        echo "All kgrep functionality tests passed"
+    
+    - name: Test kgrep functionality (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        # Verify kgrep binary exists and is executable
+        where kgrep
+        
+        # Test basic kgrep commands
+        kgrep version
+        kgrep --help
+        
+        Write-Host "All kgrep functionality tests passed"
+      shell: pwsh 

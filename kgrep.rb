@@ -27,6 +27,18 @@ class Kgrep < Formula
     end
   end
 
+  on_windows do
+    on_intel do
+      url "https://github.com/kgrep-org/kgrep/releases/download/v0.4.2/kgrep-windows-amd64.zip"
+      sha256 "d7d8fcb080098534bbedcc0476539ce77ce68a820acc5d925508156958c4f63f"
+    end
+
+    on_arm do
+      url "https://github.com/kgrep-org/kgrep/releases/download/v0.4.2/kgrep-windows-arm64.zip"
+      sha256 "f9ea6fa68e12cf37c7bf6f88a0e2a2da0422a4859f0b3c0808622412144bd57a"
+    end
+  end
+
   depends_on "kubectl"
 
   def install
