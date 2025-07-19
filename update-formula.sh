@@ -30,13 +30,44 @@ show_usage() {
     echo "Updates the Homebrew formula for a new kgrep release"
     echo ""
     echo "Example:"
-    echo "  $0 0.4.2"
+    echo "  $0 0.4.3   # Creates kgrep@0.4.2.rb then updates to v0.4.3"
     echo ""
     echo "This script will:"
-    echo "  1. Download release binaries from GitHub"
-    echo "  2. Calculate SHA256 checksums"
-    echo "  3. Update the formula with new version and checksums"
+    echo "  1. Create a versioned formula for the current version"
+    echo "  2. Download release binaries from GitHub"
+    echo "  3. Calculate SHA256 checksums"
+    echo "  4. Update the main formula with new version and checksums"
     echo ""
+}
+
+# Function to get the current version from kgrep.rb
+get_current_version() {
+    grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' kgrep.rb | head -1 | sed 's/v//'
+}
+
+# Function to create versioned formula
+create_versioned_formula() {
+    local old_version=$1
+    local versioned_file="kgrep@${old_version}.rb"
+    local class_name="KgrepAT$(echo $old_version | sed 's/\.//g')"
+    
+    print_status "Creating versioned formula for v${old_version}..."
+    
+    if [[ -f "$versioned_file" ]]; then
+        print_error "Versioned formula $versioned_file already exists"
+        return 1
+    fi
+    
+    # Copy current formula to versioned formula
+    cp kgrep.rb "$versioned_file"
+    
+    # Update class name in versioned formula
+    sed -i.tmp "s/class Kgrep/class $class_name/" "$versioned_file"
+    rm -f "${versioned_file}.tmp"
+    
+    print_success "Created versioned formula: $versioned_file"
+    print_status "  Class name: $class_name"
+    print_status "  Version: v${old_version}"
 }
 
 download_and_hash() {
@@ -46,20 +77,21 @@ download_and_hash() {
     local filename="kgrep-${platform}-${arch}.tar.gz"
     local url="https://github.com/kgrep-org/kgrep/releases/download/v${version}/${filename}"
     
-    print_status "Downloading ${filename}..."
+    print_status "Downloading ${filename}..." >&2
     
-    if ! curl -L -f -o "/tmp/${filename}" "${url}"; then
-        print_error "Failed to download ${filename} from ${url}"
+    if ! curl -L -f -o "/tmp/${filename}" "${url}" 2>/dev/null; then
+        print_error "Failed to download ${filename} from ${url}" >&2
         return 1
     fi
     
     local sha256=$(shasum -a 256 "/tmp/${filename}" | cut -d' ' -f1)
-    print_success "Downloaded ${filename}, SHA256: ${sha256}"
+    print_success "Downloaded ${filename}, SHA256: ${sha256}" >&2
     
     # Clean up
     rm -f "/tmp/${filename}"
     
-    echo "${sha256}"
+    # Return only the clean SHA256 value
+    printf "%s" "${sha256}"
 }
 
 update_formula() {
@@ -82,7 +114,7 @@ update_formula() {
     cp kgrep.rb kgrep.rb.backup
     
     # Update the formula - replace version in URLs
-    sed -i.tmp "s|/releases/download/v[0-9.]\+/|/releases/download/v${version}/|g" kgrep.rb
+    sed -i.tmp "s|/releases/download/v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/|/releases/download/v${version}/|g" kgrep.rb
     
     # Create a temporary script to update SHA256 values more reliably
     cat > /tmp/update_sha256.py << 'EOF'
@@ -168,10 +200,23 @@ fi
 
 print_status "Updating Homebrew formula for kgrep v${version}"
 
+# Create versioned formula for current version
+current_version=$(get_current_version)
+if [[ -n "$current_version" ]]; then
+    create_versioned_formula "$current_version"
+    print_status ""
+else
+    print_error "Could not determine current version from kgrep.rb"
+    exit 1
+fi
+
 update_formula "$version"
 
 print_success "Formula update completed!"
-print_status "Next steps:"
-echo "  1. Test the formula: brew audit --strict kgrep.rb"
-echo "  2. Commit the changes: git add kgrep.rb && git commit -m 'Update to v${version}'"
-echo "  3. Push to repository: git push origin main"
+print_status "Files created/updated:"
+echo "  - kgrep.rb (updated to v${version})"
+echo "  - kgrep@${current_version}.rb (new versioned formula)"
+print_status ""
+print_status "Test the formulas:"
+echo "  brew audit --strict kgrep.rb"
+echo "  brew install --formula ./kgrep@${current_version}.rb"

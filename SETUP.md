@@ -19,14 +19,34 @@ Use the provided script to update the formula:
 
 ```bash
 cd homebrew-kgrep
-./update-formula.sh 0.4.2  # Replace with actual version
+./update-formula.sh 0.4.3  # Replace with actual version
 ```
 
-This script will:
+This script automatically:
 
-- Download all platform binaries
-- Calculate SHA256 checksums
-- Update the formula with the new version and checksums
+- Creates a versioned formula for the current version (preserves user choice and compatibility)
+- Downloads all platform binaries for the new version
+- Calculates SHA256 checksums
+- Updates the main formula with the new version and checksums
+
+**Why versioned formulas are automatically created:**
+- Users can pin to specific versions for reproducible builds
+- Allows parallel installation of multiple versions
+- Maintains backward compatibility
+- Follows Homebrew best practices (like `node@14`, `python@3.9`)
+
+#### Automatic Versioned Formula Creation
+
+The script automatically:
+
+1. Detects the current version from `kgrep.rb` (e.g., v0.4.2)
+2. Creates `kgrep@0.4.2.rb` with the current formula content
+3. Updates the class name to `KgrepAT042`
+4. Updates `kgrep.rb` to the new version (e.g., v0.4.3)
+
+This allows users to install specific versions:
+- `brew install kgrep-org/kgrep/kgrep` (latest version)
+- `brew install kgrep-org/kgrep/kgrep@0.4.2` (specific version)
 
 ### 3. Test the Formula
 
@@ -41,17 +61,11 @@ kgrep version
 kgrep --help
 ```
 
-### 4. Commit and Push
-
-```bash
-git add kgrep.rb
-git commit -m "Update to v0.4.2"
-git push origin main
-```
-
 ## User Installation
 
 Once the tap is published, users can install kgrep with:
+
+### Latest Version
 
 ```bash
 # Method 1: Add tap then install
@@ -60,6 +74,26 @@ brew install kgrep
 
 # Method 2: Install directly
 brew install kgrep-org/kgrep/kgrep
+```
+
+### Specific Versions
+
+```bash
+# Add tap first
+brew tap kgrep-org/kgrep
+
+# Install specific version
+brew install kgrep@0.4.1
+
+# Or install directly
+brew install kgrep-org/kgrep/kgrep@0.4.1
+```
+
+### List Available Versions
+
+```bash
+# Show all available formulas in the tap
+brew search kgrep-org/kgrep/
 ```
 
 ## Formula Structure
@@ -101,19 +135,36 @@ The GitHub Actions workflow automatically tests:
 
 - **Solution**: Ensure script is executable: `chmod +x update-formula.sh`
 
+## Creating Versioned Formulas for Existing Releases
+
+If you need to create versioned formulas for existing kgrep releases:
+
+```bash
+# Create a versioned formula for a specific version
+./create-versioned-formula.sh 0.4.1
+
+# This will:
+# 1. Download binaries for v0.4.1 from GitHub
+# 2. Calculate SHA256 checksums
+# 3. Create kgrep@0.4.1.rb with proper checksums
+```
+
 ## File Structure
 
 ```sh
 homebrew-kgrep/
 ├── .github/
 │   └── workflows/
-│       └── test.yml           # CI tests for formula
-├── .gitignore                 # Ignore backup and temp files
-├── LICENSE                    # License file
-├── README.md                  # User-facing documentation
-├── SETUP.md                   # This setup guide
-├── kgrep.rb                   # The Homebrew formula
-└── update-formula.sh          # Script to update formula
+│       └── test.yml              # CI tests for formula
+├── .gitignore                    # Ignore backup and temp files
+├── LICENSE                       # License file
+├── README.md                     # User-facing documentation
+├── SETUP.md                      # This setup guide
+├── kgrep.rb                      # The main Homebrew formula (latest version)
+├── kgrep@0.4.1.rb               # Versioned formula for v0.4.1
+├── kgrep@0.4.0.rb               # Versioned formula for v0.4.0
+├── update-formula.sh             # Script to update formula
+└── create-versioned-formula.sh  # Script to create versioned formulas
 ```
 
 ## Resources
