@@ -5,25 +5,25 @@ class Kgrep < Formula
 
   on_macos do
     on_intel do
-      url "https://github.com/kgrep-org/kgrep/releases/download/v0.4.2/kgrep-macos-amd64.tar.gz"
-      sha256 "8fd0ba5e64d2a4f7b8403c0e997bc2680bd6d1e4d67d5559cc317c6882467295"
+      url "https://github.com/kgrep-org/kgrep/releases/download/v0.5.0/kgrep-macos-amd64.tar.gz"
+      sha256 "2a0efc5466d6dbd0f20b87a8b4ad33a2ee2096c6f29fb6a959a9a4ddd1dbc24b"
     end
 
     on_arm do
-      url "https://github.com/kgrep-org/kgrep/releases/download/v0.4.2/kgrep-macos-arm64.tar.gz"
-      sha256 "93b2f0b910184083206d74c5d2952945d0e214af68b2b59628ca160237889841"
+      url "https://github.com/kgrep-org/kgrep/releases/download/v0.5.0/kgrep-macos-arm64.tar.gz"
+      sha256 "384053c3afe720fbcf94ef8d210539bbc48b4aeff7e36f5805a402dc1e213520"
     end
   end
 
   on_linux do
     on_intel do
-      url "https://github.com/kgrep-org/kgrep/releases/download/v0.4.2/kgrep-linux-amd64.tar.gz"
-      sha256 "e8e8d18d0ced1cbd0f97986974c359e7fffc3c64a79e61abefa2798a9bc2198b"
+      url "https://github.com/kgrep-org/kgrep/releases/download/v0.5.0/kgrep-linux-amd64.tar.gz"
+      sha256 "d6fdd00b23b5adba2b20ceb5de964fc8f99279f1a2803888752c7d9aefe20b17"
     end
 
     on_arm do
-      url "https://github.com/kgrep-org/kgrep/releases/download/v0.4.2/kgrep-linux-arm64.tar.gz"
-      sha256 "fcd6daae88ab80fec4c734438755486301af68b3f4b85b2418e0ec06b7158ac5"
+      url "https://github.com/kgrep-org/kgrep/releases/download/v0.5.0/kgrep-linux-arm64.tar.gz"
+      sha256 "f406a484a5944dccba54bfb27601452de501a88a0750f00440a312c0b4b03e9c"
     end
   end
 
