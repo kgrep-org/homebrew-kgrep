@@ -20,22 +20,19 @@ jobs:
       id: set-up-homebrew
       uses: Homebrew/actions/setup-homebrew@master
     
-    - name: Install kubectl
+    - name: Tap local repository
       run: |
-        if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-        else
-          brew install kubectl
-        fi
+        # Create a temporary tap name and tap the local directory
+        mkdir -p $(brew --repo)/Library/Taps/test
+        ln -sf $PWD $(brew --repo)/Library/Taps/test/homebrew-kgrep
     
     - name: Test formula syntax
-      run: brew audit --strict kgrep.rb
+      run: brew audit --strict test/kgrep/kgrep
     
     - name: Test formula installation
       run: |
         # Test that the formula can be installed
-        brew install --formula ./kgrep.rb
+        brew install test/kgrep/kgrep
     
     - name: Test kgrep functionality
       run: |
@@ -45,9 +42,5 @@ jobs:
         # Test basic kgrep commands
         kgrep version
         kgrep --help
-        
-        # Test that kgrep shows proper error for missing kubectl context
-        # (This will fail since we don't have a k8s cluster, but should show expected error)
-        kgrep pods --help || true
         
         echo "All kgrep functionality tests passed" 
