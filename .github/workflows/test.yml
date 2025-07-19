@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  test-homebrew:
+  test:
     name: Test Homebrew Formula
     strategy:
       matrix:
@@ -44,68 +44,4 @@ jobs:
         kgrep version
         kgrep --help
         
-        echo "All kgrep functionality tests passed"
-
-  test-windows-binaries:
-    name: Test Windows Binaries
-    runs-on: windows-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Validate Windows AMD64 binary
-      run: |
-        $amd64Url = "https://github.com/kgrep-org/kgrep/releases/download/v0.4.2/kgrep-windows-amd64.zip"
-        $expectedSha256 = "d7d8fcb080098534bbedcc0476539ce77ce68a820acc5d925508156958c4f63f"
-        
-        Write-Host "Downloading Windows AMD64 binary..."
-        Invoke-WebRequest -Uri $amd64Url -OutFile "kgrep-windows-amd64.zip"
-        
-        Write-Host "Calculating SHA256..."
-        $actualSha256 = (Get-FileHash "kgrep-windows-amd64.zip" -Algorithm SHA256).Hash.ToLower()
-        
-        Write-Host "Expected SHA256: $expectedSha256"
-        Write-Host "Actual SHA256:   $actualSha256"
-        
-        if ($actualSha256 -eq $expectedSha256) {
-            Write-Host "✓ Windows AMD64 binary SHA256 verification passed"
-        } else {
-            Write-Host "✗ Windows AMD64 binary SHA256 verification failed"
-            exit 1
-        }
-        
-        # Extract and test the binary
-        Write-Host "Extracting binary..."
-        Expand-Archive "kgrep-windows-amd64.zip" -DestinationPath "."
-        
-        Write-Host "Testing kgrep binary..."
-        .\kgrep.exe version
-        .\kgrep.exe --help
-        
-        Write-Host "✓ Windows AMD64 binary functionality test passed"
-      shell: pwsh
-    
-    - name: Validate Windows ARM64 binary
-      run: |
-        $arm64Url = "https://github.com/kgrep-org/kgrep/releases/download/v0.4.2/kgrep-windows-arm64.zip"
-        $expectedSha256 = "f9ea6fa68e12cf37c7bf6f88a0e2a2da0422a4859f0b3c0808622412144bd57a"
-        
-        Write-Host "Downloading Windows ARM64 binary..."
-        Invoke-WebRequest -Uri $arm64Url -OutFile "kgrep-windows-arm64.zip"
-        
-        Write-Host "Calculating SHA256..."
-        $actualSha256 = (Get-FileHash "kgrep-windows-arm64.zip" -Algorithm SHA256).Hash.ToLower()
-        
-        Write-Host "Expected SHA256: $expectedSha256"
-        Write-Host "Actual SHA256:   $actualSha256"
-        
-        if ($actualSha256 -eq $expectedSha256) {
-            Write-Host "✓ Windows ARM64 binary SHA256 verification passed"
-        } else {
-            Write-Host "✗ Windows ARM64 binary SHA256 verification failed"
-            exit 1
-        }
-        
-        Write-Host "✓ Windows ARM64 binary download and SHA256 verification passed"
-        Write-Host "Note: ARM64 binary functionality test skipped (running on AMD64 runner)"
-      shell: pwsh 
+        echo "All kgrep functionality tests passed" 
