@@ -1,0 +1,17 @@
+# Backup files
+*.backup
+kgrep.rb.backup
+
+# macOS
+.DS_Store
+
+# Temporary files
+*.tmp
+kgrep.rb.tmp
+
+# Downloaded binaries (used during testing)
+kgrep-*-*
+
+# Python cache files (from update script)
+__pycache__/
+*.pyc 
